@@ -20,7 +20,7 @@ def load(image_path):
 
     ### YOUR CODE HERE
     # Use skimage io.imread
-    pass
+    out = io.imread(image_path)
     ### END YOUR CODE
 
     # Let's convert the image to be between the correct range.
@@ -45,7 +45,7 @@ def dim_image(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out = 0.5*np.square(image)
     ### END YOUR CODE
 
     return out
@@ -66,7 +66,7 @@ def convert_to_grey_scale(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out = color.rgb2gray(image)
     ### END YOUR CODE
 
     return out
@@ -84,9 +84,14 @@ def rgb_exclusion(image, channel):
     """
 
     out = None
-
+    out = np.array(image)
     ### YOUR CODE HERE
-    pass
+    if channel == "R":
+        out[:,:,0] = 0
+    elif channel == "G":
+        out[:,:,1] = 0
+    elif channel == "B":
+        out[:,:,2] = 0
     ### END YOUR CODE
 
     return out
@@ -107,9 +112,13 @@ def lab_decomposition(image, channel):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    if channel == "L":
+        out = lab[:,:,0]
+    elif channel == "A":
+        out = lab[:,:,1]
+    elif channel == "B":
+        out = lab[:,:,2]
     ### END YOUR CODE
-
     return out
 
 
@@ -128,7 +137,12 @@ def hsv_decomposition(image, channel='H'):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    if channel == "H":
+        out = hsv[:,:,0]
+    elif channel == "S":
+        out = hsv[:,:,1]
+    elif channel == "V":
+        out = hsv[:,:,2]
     ### END YOUR CODE
 
     return out
@@ -154,7 +168,17 @@ def mix_images(image1, image2, channel1, channel2):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    rgb1 = np.array(image1)
+    im1Shape = rgb1.shape
+    leftHalf = rgb1[:,:im1Shape[1]//2,:]
+    leftHalfExclude = rgb_exclusion(leftHalf,channel1)
+    print(leftHalfExclude.shape)
+    rgb2 = np.array(image2)
+    im2Shape = rgb2.shape
+    rightHalf = rgb2[:,im2Shape[1]//2:,:]
+    rightHalfExclude = rgb_exclusion(rightHalf,channel2)
+    print(rightHalfExclude.shape)
+    out = np.concatenate((leftHalfExclude,rightHalfExclude), axis=1)
     ### END YOUR CODE
 
     return out
@@ -183,7 +207,22 @@ def mix_quadrants(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    rgb = np.array(image)
+    rgbShape = rgb.shape 
+    topLeft = rgb[:rgbShape[0]//2,:rgbShape[1]//2,:]
+    topRight = rgb[:rgbShape[0]//2,rgbShape[1]//2:,:]
+    bottomLeft = rgb[rgbShape[0]//2:,:rgbShape[1]//2,:]
+    bottomRight = rgb[rgbShape[0]//2:,rgbShape[1]//2:,:]
+
+    topLeft1 = rgb_exclusion(topLeft, "R")
+    topRight1 = dim_image(topRight)
+    bottomLeft1 = np.sqrt(bottomLeft)
+    bottomRight1 = rgb_exclusion(bottomRight, "R")
+
+    top = np.concatenate((topLeft1, topRight1), axis=1)
+    bottom = np.concatenate((bottomLeft1, bottomRight1), axis=1)
+    out = np.concatenate((top, bottom), axis=0)
+
     ### END YOUR CODE
 
     return out
