@@ -29,7 +29,16 @@ def conv_nested(image, kernel):
     out = np.zeros((Hi, Wi))
 
     ### YOUR CODE HERE
-    pass
+    ckx = (Hk - 1)//2
+    cky = (Wk - 1)//2
+    for m in range(Hi):
+        for n in range(Wi):
+            sum = 0
+            for i in range(Hk):
+                for j in range(Wk):
+                    if (m+ckx-i>=0 and m+ckx-i<Hi and n+cky-j>=0 and n+cky-j<Wi):
+                        sum += kernel[i][j] * image[m+ckx-i][n+cky-j]
+            out[m, n] = sum
     ### END YOUR CODE
 
     return out
@@ -56,7 +65,8 @@ def zero_pad(image, pad_height, pad_width):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out = np.zeros((H+2*pad_height, W+2*pad_width))
+    out[pad_height:H+pad_height, pad_width:W+pad_width] = image
     ### END YOUR CODE
     return out
 
@@ -85,7 +95,12 @@ def conv_fast(image, kernel):
     out = np.zeros((Hi, Wi))
 
     ### YOUR CODE HERE
-    pass
+    image = zero_pad(image, Hk//2, Wk//2)
+    kernel = np.flip(kernel, 0)
+    kernel = np.flip(kernel, 1)
+    for m in range(Hi):
+        for n in range(Wi):
+            out[m,n] = np.sum(image[m:m+Hk, n:n+Wk]*kernel)
     ### END YOUR CODE
 
     return out
