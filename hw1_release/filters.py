@@ -119,7 +119,16 @@ def conv_faster(image, kernel):
     out = np.zeros((Hi, Wi))
 
     ### YOUR CODE HERE
-    pass
+    image = zero_pad(image, Hk//2, Wk//2)
+    kernel = np.flip(kernel, 0)
+    kernel = np.flip(kernel, 1)
+    mat = np.zeros((Hi*Wi, Hk*Wk))
+    for i in range(Hi*Wi):
+        row = i//Wi
+        col = i%Wi
+        #row, col = np.unravel_index(i, (Hi, Wi)) #this function is a little slow
+        mat[i,:] = image[row:row+Hk, col:col+Wk].reshape(1, Hk*Wk)
+    out = np.dot(mat, kernel.reshape(-1,1)).reshape(Hi, Wi) 
     ### END YOUR CODE
 
     return out
@@ -139,7 +148,9 @@ def cross_correlation(f, g):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    g = np.flip(g, 0)
+    g = np.flip(g, 1)
+    out = conv_faster(f, g)
     ### END YOUR CODE
 
     return out
@@ -161,7 +172,8 @@ def zero_mean_cross_correlation(f, g):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    g = g - np.mean(g)
+    out = cross_correlation(f, g)
     ### END YOUR CODE
 
     return out
@@ -185,7 +197,9 @@ def normalized_cross_correlation(f, g):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    f = (f - np.mean(f))/np.std(f)
+    g = (g - np.mean(g))/np.std(g)
+    out = cross_correlation(f, g)
     ### END YOUR CODE
 
     return out
