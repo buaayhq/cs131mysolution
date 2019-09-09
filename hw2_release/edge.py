@@ -36,7 +36,12 @@ def conv(image, kernel):
     padded = np.pad(image, pad_width, mode='edge')
 
     ### YOUR CODE HERE
-    pass
+    mat = np.zeros((Hi*Wi, Hk*Wk))
+    for i in range(Hi*Wi):
+        row = i//Wi
+        col = i%Wi
+        mat[i,:] = padded[row:row+Hk, col:col+Wk].reshape(1, Hk*Wk)
+    out = np.dot(mat, kernel.reshape(-1,1)).reshape(Hi, Wi)
     ### END YOUR CODE
 
     return out
@@ -61,7 +66,9 @@ def gaussian_kernel(size, sigma):
     kernel = np.zeros((size, size))
 
     ### YOUR CODE HERE
-    pass
+    for i in range(size):
+        for j in range(size):
+            kernel[i][j] = (1/(2*np.pi*sigma**2))*np.exp(-((i-size//2)**2+(j-size//2)**2)/(2*sigma**2))
     ### END YOUR CODE
 
     return kernel
@@ -81,7 +88,8 @@ def partial_x(img):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    kernel = (1/2)*np.array([-1, 0 ,1]).reshape(1,3)
+    out = conv(img, kernel)
     ### END YOUR CODE
 
     return out
@@ -101,7 +109,8 @@ def partial_y(img):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    kernel = (1/2)*np.array([-1, 0, 1]).reshape(3,1)
+    out = conv(img, kernel)
     ### END YOUR CODE
 
     return out
@@ -125,7 +134,10 @@ def gradient(img):
     theta = np.zeros(img.shape)
 
     ### YOUR CODE HERE
-    pass
+    Gx = partial_x(img)
+    Gy = partial_y(img)
+    G = np.sqrt(np.square(Gx)+np.square(Gy))
+    theta = (np.arctan2(Gy, Gx) * 180.0 / np.pi + 180)/360
     ### END YOUR CODE
 
     return G, theta
@@ -151,7 +163,15 @@ def non_maximum_suppression(G, theta):
     theta = np.floor((theta + 22.5) / 45) * 45
 
     ### BEGIN YOUR CODE
-    pass
+    for i in range(1, H-1):
+        for j in range(1, W-1):
+            rad = np.deg2rad(theta[i][j])
+            pPositive = G[i+int(np.round(np.sin(rad)))][j+int(np.round(np.cos(rad)))]
+            pNegative = G[i-int(np.round(np.sin(rad)))][j-int(np.round(np.cos(rad)))]
+            if G[i][j]< pPositive or G[i][j] < pNegative:
+                out[i][j] = 0
+            else:
+                out[i][j] = G[i][j]
     ### END YOUR CODE
 
     return out
