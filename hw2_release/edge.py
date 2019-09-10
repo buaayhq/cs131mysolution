@@ -196,7 +196,8 @@ def double_thresholding(img, high, low):
     weak_edges = np.zeros(img.shape, dtype=np.bool)
 
     ### YOUR CODE HERE
-    pass
+    strong_edges = img > high
+    weak_edges = (img <= high) & (img > low)
     ### END YOUR CODE
 
     return strong_edges, weak_edges
@@ -255,7 +256,14 @@ def link_edges(strong_edges, weak_edges):
     edges = np.copy(strong_edges)
 
     ### YOUR CODE HERE
-    pass
+    for i in range(1, H):
+        for j in range(1, W):
+            neighbor = get_neighbors(j, i, H, W)
+            # at first, current edge must be weak edges, and then, if one of the neighbors of the edge is strong edges
+            # then we should keep current edge
+            if weak_edges[i, j] and np.any(edges[x,y] for x,y in neighbor):
+                edges[i,j] = True
+
     ### END YOUR CODE
 
     return edges
@@ -273,7 +281,13 @@ def canny(img, kernel_size=5, sigma=1.4, high=20, low=15):
         edge: numpy array of shape(H, W).
     """
     ### YOUR CODE HERE
-    pass
+    edge = np.zeros((img.shape[0], img.shape[1]))
+    kernel = gaussian_kernel(kernel_size, sigma)
+    smoothImage = conv(img, kernel)
+    G, theta = gradient(smoothImage)
+    nms = non_maximum_suppression(G, theta)
+    strong_edges, weak_edges = double_thresholding(nms, high, low)
+    edge = link_edges(strong_edges, weak_edges)
     ### END YOUR CODE
 
     return edge
@@ -313,7 +327,10 @@ def hough_transform(img):
     # Find rho corresponding to values in thetas
     # and increment the accumulator in the corresponding coordiate.
     ### YOUR CODE HERE
-    pass
+    for i in range(len(ys)):
+        rho = xs[i]*cos_t + ys[i]*sin_t
+        for j in range(len(rho)):
+            accumulator[int(rho[j]+diag_len),j] += 1
     ### END YOUR CODE
 
     return accumulator, rhos, thetas
